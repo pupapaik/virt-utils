@@ -6,12 +6,12 @@
 # -u/--user-data option).
 
 usage () {
-	echo "usage: ${0##*/}: [--ssh-key <pubkey>] [--vendor-data <file>] [--user-data <file>] [--hostname <hostname>] <imagename>"
+	echo "usage: ${0##*/}: [--ssh-key <pubkey>] [--vendor-data <file>] [--user-data <file>] [--hostname <hostname>] [--model <model>] <imagename>"
 }
 
 ARGS=$(getopt \
-	-o k:u:v:h: \
-	--long help,hostname:,ssh-key:,user-data:,vendor-data: -n ${0##*/} \
+	-o k:u:v:h:m: \
+	--long help,hostname:,ssh-key:,user-data:,vendor-data:,model: -n ${0##*/} \
 	-- "$@")
 
 if [ $? -ne 0 ]; then
@@ -43,6 +43,10 @@ while :; do
 			hostname="$2"
 			shift 2
 			;;
+                -m|--model)
+                        model="$2"
+                        shift 2
+                        ;;
 		--)	shift
 			break
 			;;
@@ -75,6 +79,12 @@ fi
 if [ "$vendor_data" ] && [ -f "$vendor_data" ]; then
 	echo "adding vendor data from $vendor_data"
 	cp $vendor_data $config_dir/vendor-data
+fi
+
+if [ "$model" ] ; then
+        echo "adding reclass model directory $model"
+        mkdir $config_dir/model
+        cp -r $model $config_dir/model/
 fi
 
 cat > $config_dir/meta-data <<-EOF
